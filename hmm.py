@@ -2,15 +2,14 @@ from nltk import FreqDist, WittenBellProbDist
 from nltk.corpus import brown
 from nltk.tag.util import untag
 import operator
-import sys
 
 
 class HMM:
-    def __init__(self, corpus, tagset=""):
+    def __init__(self, corpus, tagset="", trainSize=10000, testSize=500):
         self.corpus = corpus
         self.taggedSents, self.sents = self.getSentences(tagset)
-        self.trainSize = int(sys.argv[2])
-        self.testingSize = int(sys.argv[3])
+        self.trainSize = trainSize
+        self.testingSize = testSize
         self.trainSents, self.testSents = self.splitTrainingTesting()
         self.words, self.tags = self.splitWordsTags()
         self.check_sents = self.taggedSents[self.trainSize:self.trainSize + self.testingSize]
@@ -63,36 +62,31 @@ class HMM:
         return finalTags
 
     def getSentences(self, selected_tagset):
-        taggedSents = self.corpus.tagged_sents(tagset=selected_tagset)
+        tagged_sents = self.corpus.tagged_sents(tagset=selected_tagset)
         sents = self.corpus.sents()
-        return taggedSents, sents
+        return tagged_sents, sents
 
     def splitTrainingTesting(self):
         train_sents = self.taggedSents[:self.trainSize]
         test_sents = self.sents[self.trainSize:self.trainSize + self.testingSize]
         return train_sents, test_sents
 
-    def splitWordsTags(self):
+    def splitToWordsByTags(self, sentences):
         words = []
         tags = []
         startDelimeter = ["<s>"]
         endDelimeter = ["</s>"]
 
-        for s in self.trainSents:
+        for s in sentences:
             words += startDelimeter + [w for (w, _) in s] + endDelimeter
             tags += startDelimeter + [t for (_, t) in s] + endDelimeter
         return words, tags
+
+    def splitWordsTags(self):
+        return self.splitToWordsByTags(self.trainSents)
 
     def splitWordsTagsTesting(self):
-        words = []
-        tags = []
-        startDelimeter = ["<s>"]
-        endDelimeter = ["</s>"]
-
-        for s in self.check_sents:
-            words += startDelimeter + [w for (w, _) in s] + endDelimeter
-            tags += startDelimeter + [t for (_, t) in s] + endDelimeter
-        return words, tags
+        return self.splitToWordsByTags(self.check_sents)
 
     def splitWordsTagsTestingNoDelim(self):
         sentances = []
@@ -103,12 +97,10 @@ class HMM:
             tags.append([t for (_, t) in s])
         return sentances, tags
 
+
     def getUniqueTags(self):
-        tagSet = set(self.tags)
-        tagList = list(tagSet)
-
+        tagList = list(set(self.tags))
         noDelim = tagList.copy()
-
         noDelim.remove('<s>')
         noDelim.remove('</s>')
 
@@ -185,5 +177,10 @@ def main():
     tagset = "universal"
     hmm = HMM(corpus, tagset)
 
+def downloadCorpus():
+    nltk.download('brown')
+    nltk.download('universal_tagset')
+
 if __name__ == '__main__':
+    downloadCorpus()
     main()
