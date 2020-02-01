@@ -1,3 +1,4 @@
+import nltk
 from nltk import FreqDist, WittenBellProbDist
 from nltk.corpus import brown
 from nltk.tag.util import untag
@@ -14,16 +15,20 @@ class HMM:
         # split the set of all sentences into training set and testing set
         self.trainSents, self.testSents = self.splitTrainingTesting()
 
-        # do smoothing for training sentences
+        # split training sentences into tags and words
         self.words, self.tags = self.splitWordsTags()
         self.check_sents = self.taggedSents[self.trainSize:self.trainSize + self.testingSize]
 
-        # do smoothing for testing sentences
+        # split testing sentences into tags and words
         self.testingWords, self.testingTags = self.splitWordsTagsTesting()
+
+        # split testing sentences into tags and words - exclude delimiters
         self.testingWordsNoDelim, self.testingTagsNoDelim = self.splitWordsTagsTestingNoDelim()
 
         self.tagsDistribution = FreqDist(self.tags)
         self.uniqueTags, self.uniqueTagsNoDelim = self.getUniqueTags()
+
+        # calculate smoothed probabilities
         self.wordsDist, self.tagsDist = self.setProbDistributions()
 
         self.finalTags = self.viterbi()
@@ -72,6 +77,12 @@ class HMM:
         return tagged_sents, sents
 
     def splitTrainingTesting(self):
+        """
+        Split a list of all sentences into training sentences and testing sentences.
+
+        :return train_sents: A list of training sentences
+        :return test_sents: A list of testing sentences
+        """
         train_sents = self.taggedSents[:self.trainSize]
         test_sents = self.sents[self.trainSize:self.trainSize + self.testingSize]
         return train_sents, test_sents
@@ -121,12 +132,17 @@ class HMM:
 
 
     def getUniqueTags(self):
-        tagList = list(set(self.tags))
-        noDelim = tagList.copy()
-        noDelim.remove('<s>')
-        noDelim.remove('</s>')
+        """
+        Get lists of unique tags.
 
-        return tagList, noDelim
+        :return uniqueTagList: A list of unique tags - include delimiters
+        :return uniqueTagList_noDelim: A list of unique tags - exclude delimiters
+        """
+        uniqueTagList = list(set(self.tags))
+        uniqueTagList_noDelim = uniqueTagList.copy()
+        uniqueTagList_noDelim.remove('<s>')
+        uniqueTagList_noDelim.remove('</s>')
+        return uniqueTagList, uniqueTagList_noDelim
 
     def setProbDistributions(self):
         tagMap = {}
@@ -174,9 +190,9 @@ class HMM:
 
     def output(self):
         print(self.testingTagsNoDelim)
-        print("--------------------------")
-        print(self.finalTags)
-        print("--------------------------")
+        #print("--------------------------")
+        #print(self.finalTags)
+        #print("--------------------------")
 
         correct = 0
         total = 0
@@ -186,11 +202,11 @@ class HMM:
                     correct = correct+1
                 total = total + 1
 
-        percent = (correct/total)*100
+        percent = (correct / total) * 100
 
         print("Training Data: " + str(self.trainSize) + " Sentences")
         print("Testing Data: " + str(self.testingSize) + " Sentences")
-        print(str(percent)+"% Accuracy")
+        print("Accuracy {}%".format(percent))
 
 
 
