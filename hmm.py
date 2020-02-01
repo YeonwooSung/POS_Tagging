@@ -10,10 +10,15 @@ class HMM:
         self.taggedSents, self.sents = self.getSentences(tagset)
         self.trainSize = trainSize
         self.testingSize = testSize
+
+        # split the set of all sentences into training set and testing set
         self.trainSents, self.testSents = self.splitTrainingTesting()
+
+        # do smoothing for training sentences
         self.words, self.tags = self.splitWordsTags()
         self.check_sents = self.taggedSents[self.trainSize:self.trainSize + self.testingSize]
 
+        # do smoothing for testing sentences
         self.testingWords, self.testingTags = self.splitWordsTagsTesting()
         self.testingWordsNoDelim, self.testingTagsNoDelim = self.splitWordsTagsTestingNoDelim()
 
@@ -72,6 +77,13 @@ class HMM:
         return train_sents, test_sents
 
     def splitToWordsByTags(self, sentences):
+        """
+        This method performs the smoothing for the given sentences.
+
+        :param sentences: A set of target sentences
+        :return words: A list of words
+        :return tags: A list of tags
+        """
         words = []
         tags = []
         startDelimeter = ["<s>"]
@@ -83,9 +95,19 @@ class HMM:
         return words, tags
 
     def splitWordsTags(self):
+        """
+        Smoothing for the training sentences.
+
+        :return: Returns a list of words and a list of tags, which are returned by the splitToWordsByTags() method
+        """
         return self.splitToWordsByTags(self.trainSents)
 
     def splitWordsTagsTesting(self):
+        """
+        Smoothing for the testing sentences.
+
+        :return: Returns a list of words and a list of tags, which are returned by the splitToWordsByTags() method
+        """
         return self.splitToWordsByTags(self.check_sents)
 
     def splitWordsTagsTestingNoDelim(self):
