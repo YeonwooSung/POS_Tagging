@@ -7,6 +7,7 @@ import operator
 
 class HMM:
     def __init__(self, corpus, tagset="", trainSize=10000, testSize=500):
+        # initialise the basic attributes
         self.corpus = corpus
         self.taggedSents, self.sents = self.getSentences(tagset)
         self.trainSize = trainSize
@@ -15,9 +16,15 @@ class HMM:
         # split the set of all sentences into training set and testing set
         self.trainSents, self.testSents = self.splitTrainingTesting()
 
+        # A transit table that is used for counting occurrences of one part of speech following another in a training corpus
+        self.transitTable = {}
+
         # split training sentences into tags and words
         self.words, self.tags = self.splitWordsTags()
         self.check_sents = self.taggedSents[self.trainSize:self.trainSize + self.testingSize]
+
+        # count occurrences of words together with parts of speech in a training corpus
+        self.occurrenceMap_w, self.occurrenceMap_t = self.countOccurrences()
 
         # split testing sentences into tags and words
         self.testingWords, self.testingTags = self.splitWordsTagsTesting()
@@ -31,25 +38,30 @@ class HMM:
         # calculate smoothed probabilities
         self.wordsDist, self.tagsDist = self.setProbDistributions()
 
-        self.finalTags = self.viterbi()
-        self.output()
 
-
-    def viterbi(self):
+    def viterbi(self, targetSentences:list=None):
         """
         Viterbi Algorithm
         """
         finalTags=[]
         probMatrix = []
-        for s in self.testingWordsNoDelim:
+        distOfStartOfSentence = self.tagsDist['<s>']
+
+        # check if the targetSentences is None
+        if targetSentences is None:
+            targetSentences = self.testingWordsNoDelim  # If None, use the testing sentences
+
+        # use for loop to iterate targetSentences
+        for s in targetSentences:
             firstRun = True
             for word in s:
                 col = []
                 for t in self.uniqueTagsNoDelim:
 
+                    # check if this is the first run
                     if firstRun:
-                        pT = self.tagsDist['<s>'].prob(t)
-                        pW = self.wordsDist[t].prob(word)
+                        pT = distOfStartOfSentence.prob(t)  # use the distribution value of 'start-of-sentence' as tag probability
+                        pW = self.wordsDist[t].prob(word)   # calculate the probability value for the current word with given tag
                         col.append([pW*pT, "q0"])
 
                     else:
@@ -76,6 +88,60 @@ class HMM:
         sents = self.corpus.sents()
         return tagged_sents, sents
 
+    def countOccurrences(self):
+        """
+        Count the occurrences of words together with parts of speech in a training corpus.
+
+        :return occurrenceMap_w: A dictionary for the occurrences of words
+        :return occurrenceMap_t: A dictionary for the occurrences of tags
+        """
+        wordList = self.words
+        tagList = self.tags
+
+        def countOccurrencesForGivenList(targetList):
+            """
+            Count the occurrences of elements in the given list.
+
+            :return targetMap: A dictionary for the calculated occurrences.
+            """
+            targetMap = {}
+            for e in targetList:
+                # skip the start-of-sentence and end-of-sentence
+                if e == '<s>' or e == '</s>':
+                    continue
+
+                if targetMap.get(e) is None:
+                    targetMap[e] = 1
+                else:
+                    targetMap[e] = targetMap[e] + 1
+
+            return targetMap
+
+        occurrenceMap_w = countOccurrencesForGivenList(wordList)
+        occurrenceMap_t = countOccurrencesForGivenList(tagList)
+
+        return occurrenceMap_w, occurrenceMap_t
+
+    def countPrevTagToCurTag(self, sentence):
+        """
+        Count occurrences of one part of speech following another in a training corpus.
+        """
+        curTag = '<s>'
+
+        for (_, t) in sentence:
+            prevTag = curTag
+            curTag = t
+
+            # check if given sequence of tags is in the transitTable
+            if prevTag not in self.transitTable:
+                self.transitTable[prevTag] = {}
+                self.transitTable[prevTag][curTag] = 1
+            elif curTag not in self.transitTable[prevTag]:
+                self.transitTable[prevTag][curTag] = 1
+            else:
+                self.transitTable[prevTag][curTag] += 1
+
+
     def splitTrainingTesting(self):
         """
         Split a list of all sentences into training sentences and testing sentences.
@@ -87,9 +153,9 @@ class HMM:
         test_sents = self.sents[self.trainSize:self.trainSize + self.testingSize]
         return train_sents, test_sents
 
-    def splitToWordsByTags(self, sentences):
+    def splitIntoWordsAndTags(self, sentences, isTraining=False):
         """
-        This method performs the smoothing for the given sentences.
+        This method splits the sentences into words and tags.
 
         :param sentences: A set of target sentences
         :return words: A list of words
@@ -101,33 +167,36 @@ class HMM:
         endDelimeter = ["</s>"]
 
         for s in sentences:
+            if isTraining:
+                self.countPrevTagToCurTag(s) # count occurrences of one part of speech following another in a training corpus
+
             words += startDelimeter + [w for (w, _) in s] + endDelimeter
             tags += startDelimeter + [t for (_, t) in s] + endDelimeter
         return words, tags
 
     def splitWordsTags(self):
         """
-        Smoothing for the training sentences.
+        Splitting the training sentences into words and tags.
 
         :return: Returns a list of words and a list of tags, which are returned by the splitToWordsByTags() method
         """
-        return self.splitToWordsByTags(self.trainSents)
+        return self.splitIntoWordsAndTags(self.trainSents, True)
 
     def splitWordsTagsTesting(self):
         """
-        Smoothing for the testing sentences.
+        Splitting the testing sentences into words and tags.
 
         :return: Returns a list of words and a list of tags, which are returned by the splitToWordsByTags() method
         """
-        return self.splitToWordsByTags(self.check_sents)
+        return self.splitIntoWordsAndTags(self.check_sents)
 
     def splitWordsTagsTestingNoDelim(self):
         sentances = []
         tags = []
 
         for s in self.check_sents:
-            sentances.append(untag(s))
-            tags.append([t for (_, t) in s])
+            sentances.append(untag(s)) # untag the sentence, and append it to the list of sentences
+            tags.append([t for (_, t) in s]) # add all tags in a sentence to a list of tags
         return sentances, tags
 
 
@@ -145,8 +214,8 @@ class HMM:
         return uniqueTagList, uniqueTagList_noDelim
 
     def setProbDistributions(self):
-        tagMap = {}
-        wordMap = {}
+        tag_dist = {}
+        word_dist = {}
 
         for t in self.uniqueTags:
             tagList = []
@@ -156,11 +225,11 @@ class HMM:
                     wordList.append(self.words[i])
                     if i < (len(self.tags)-2):
                         tagList.append(self.tags[i+1])
-            tagMap[t] = WittenBellProbDist(FreqDist(tagList), bins=1e5)
-            wordMap[t] = WittenBellProbDist(FreqDist(wordList), bins=1e5)
+            tag_dist[t] = WittenBellProbDist(FreqDist(tagList), bins=1e5)
+            word_dist[t] = WittenBellProbDist(FreqDist(wordList), bins=1e5)
 
-        return wordMap, tagMap
-    
+        return word_dist, tag_dist
+
     def getTagsFromMatrix(self, matrix, s):
         finalTags = []
         pointer = ""
@@ -178,7 +247,6 @@ class HMM:
                 pointer = matrix[-i][maxID][1]
 
             else:
-                # print(pointer)
                 pointerID = self.uniqueTagsNoDelim.index(pointer)
                 finalTags.append(self.uniqueTagsNoDelim[pointerID])
                 pointer = matrix[-i][pointerID][1]
@@ -186,14 +254,8 @@ class HMM:
         finalTags.reverse()
 
         return finalTags
-    
 
-    def output(self):
-        print(self.testingTagsNoDelim)
-        #print("--------------------------")
-        #print(self.finalTags)
-        #print("--------------------------")
-
+    def getAccuracy(self):
         correct = 0
         total = 0
         for s in range(0, len(self.testingTagsNoDelim)):
@@ -208,12 +270,11 @@ class HMM:
         print("Testing Data: " + str(self.testingSize) + " Sentences")
         print("Accuracy {}%".format(percent))
 
+    def viterbi_test(self):
+        self.finalTags = self.viterbi()
+        self.getAccuracy()
 
 
-def main():
-    corpus = brown
-    tagset = "universal"
-    hmm = HMM(corpus, tagset)
 
 def downloadCorpus():
     nltk.download('brown')
@@ -221,4 +282,8 @@ def downloadCorpus():
 
 if __name__ == '__main__':
     downloadCorpus()
-    main()
+
+    corpus = brown
+    tagset = "universal"
+    hmm = HMM(corpus, tagset)
+    hmm.viterbi_test()
