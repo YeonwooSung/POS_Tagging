@@ -12,6 +12,13 @@ class HMM:
         self.taggedSents, self.sents = self.getSentences(tagset)
         self.trainSize = trainSize
         self.testingSize = testSize
+        self.initialised = False
+
+
+    def setup(self):
+        """
+        Initialise the basic attributes.
+        """
 
         # split the set of all sentences into training set and testing set
         self.trainSents, self.testSents = self.splitTrainingTesting()
@@ -21,22 +28,28 @@ class HMM:
 
         # split training sentences into tags and words
         self.words, self.tags = self.splitWordsTags()
-        self.check_sents = self.taggedSents[self.trainSize:self.trainSize + self.testingSize]
 
         # count occurrences of words together with parts of speech in a training corpus
         self.occurrenceMap_w, self.occurrenceMap_t = self.countOccurrences()
 
+        # create transit table
+        self.transitTable = self.createTransitTable(self.transitTable, self.occurrenceMap_t)
+
         # split testing sentences into tags and words
+        self.check_sents = self.taggedSents[self.trainSize:self.trainSize + self.testingSize]
         self.testingWords, self.testingTags = self.splitWordsTagsTesting()
 
         # split testing sentences into tags and words - exclude delimiters
         self.testingWordsNoDelim, self.testingTagsNoDelim = self.splitWordsTagsTestingNoDelim()
 
-        self.tagsDistribution = FreqDist(self.tags)
+        #TODO ???? self.tagsDistribution = FreqDist(self.tags)
         self.uniqueTags, self.uniqueTagsNoDelim = self.getUniqueTags()
 
         # calculate smoothed probabilities
         self.wordsDist, self.tagsDist = self.setProbDistributions()
+
+        # Mark as initialised
+        self.initialised = True
 
 
     def viterbi(self, targetSentences:list=None):
@@ -106,9 +119,10 @@ class HMM:
             """
             targetMap = {}
             for e in targetList:
+                #TODO
                 # skip the start-of-sentence and end-of-sentence
-                if e == '<s>' or e == '</s>':
-                    continue
+                #if e == '<s>' or e == '</s>':
+                    #continue
 
                 if targetMap.get(e) is None:
                     targetMap[e] = 1
@@ -173,6 +187,28 @@ class HMM:
             words += startDelimeter + [w for (w, _) in s] + endDelimeter
             tags += startDelimeter + [t for (_, t) in s] + endDelimeter
         return words, tags
+
+
+    def createTransitTable(self, transit_table, tags_counter):
+        """
+        Create transit table with Laplace smoothing.
+
+        :param transit_table: A transit table that contains the occurrences of one part of speech following another in a training corpus.
+        :param tags_counter: A list of occurrences of part of speech in a training corpus.
+        """
+        # One less because a start of sentence <S> is excluded
+        total_tags = len(transit_table) - 1
+
+        for i in transit_table:
+            for j in transit_table:
+                if j != '<s>':
+                    if j not in transit_table[i]:
+                        transit_table[i][j] = 0  # fill empty cells with zero value
+                    else:
+                        # apply Laplace smoothing
+                        transit_table[i][j] = (transit_table[i][j] + 1.0) / (tags_counter[i] + total_tags)
+        return transit_table
+
 
     def splitWordsTags(self):
         """
@@ -271,6 +307,8 @@ class HMM:
         print("Accuracy {}%".format(percent))
 
     def viterbi_test(self):
+        if not self.initialised:
+            self.setup()
         self.finalTags = self.viterbi()
         self.getAccuracy()
 
@@ -283,7 +321,9 @@ def downloadCorpus():
 if __name__ == '__main__':
     downloadCorpus()
 
+    # create HMM instance, and run the Viterbi test
     corpus = brown
     tagset = "universal"
     hmm = HMM(corpus, tagset)
+    hmm.setup()
     hmm.viterbi_test()
