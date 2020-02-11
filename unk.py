@@ -173,6 +173,10 @@ class HMM_UNK(HMM):
         return finalTags
 
 
+def downloadCorpus():
+    nltk.download('brown')
+    nltk.download('universal_tagset')
+
 def main():
     corpus = brown
     tagset = "universal"
@@ -181,4 +185,5 @@ def main():
     hmm.viterbi_test()
 
 if __name__ == '__main__':
+    downloadCorpus()
     main()
