@@ -27,7 +27,7 @@ class HMM:
         self.transitTable = {}
 
         # split training sentences into tags and words
-        self.words, self.tags = self.splitWordsTags()
+        self.words, self.tags = self.splitWordsTagsTraining()
 
         # count occurrences of words together with parts of speech in a training corpus
         self.occurrenceMap_w, self.occurrenceMap_t = self.countOccurrences()
@@ -80,7 +80,9 @@ class HMM:
                     else:
                         tagMap = {}
                         for pp in range(0, len(self.uniqueTagsNoDelim)):
+                            # P(t(i) | t(i-1))
                             pT = self.tagsDist[self.uniqueTagsNoDelim[pp]].prob(t)
+                            # P(w(i) | t(i))
                             pW = self.wordsDist[t].prob(word)
 
                             tagMap[self.uniqueTagsNoDelim[pp]] = pT * pW * probMatrix[-1][pp][0]
@@ -209,8 +211,7 @@ class HMM:
                         transit_table[i][j] = (transit_table[i][j] + 1.0) / (tags_counter[i] + total_tags)
         return transit_table
 
-
-    def splitWordsTags(self):
+    def splitWordsTagsTraining(self):
         """
         Splitting the training sentences into words and tags.
 
@@ -318,12 +319,14 @@ def downloadCorpus():
     nltk.download('brown')
     nltk.download('universal_tagset')
 
-if __name__ == '__main__':
-    downloadCorpus()
-
+def main():
     # create HMM instance, and run the Viterbi test
     corpus = brown
     tagset = "universal"
     hmm = HMM(corpus, tagset)
     hmm.setup()
     hmm.viterbi_test()
+
+if __name__ == '__main__':
+    downloadCorpus()
+    main()
