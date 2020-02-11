@@ -1,3 +1,4 @@
+import nltk
 from hmm import HMM
 from nltk.corpus import brown
 import operator
@@ -17,18 +18,12 @@ class HMM_UNK(HMM):
 
         # split training sentences into tags and words
         self.words, self.tags = self.splitWordsTagsTraining()
-
         # count occurrences of words together with parts of speech in a training corpus
         self.occurrenceMap_w, self.occurrenceMap_t = self.countOccurrences()
-
-        #TODO find and replace the infrequent words with suitable UNK tag
+        # find and replace the infrequent words with suitable UNK tag
         self.words = self.replaceInfrequentWords_UNK()
-
-        #TODO
-
         # create transit table
-        self.transitTable = self.createTransitTable(
-            self.transitTable, self.occurrenceMap_t)
+        self.transitTable = self.createTransitTable(self.transitTable, self.occurrenceMap_t)
 
         # split testing sentences into tags and words
         self.check_sents = self.taggedSents[self.trainSize : self.trainSize + self.testingSize]
@@ -85,8 +80,8 @@ class HMM_UNK(HMM):
             unk_tag = 'UNK-%'
         elif word.endswith('ed'):
             unk_tag = 'UNK-ed'
-        elif word.endswith('y'):
-            unk_tag = 'UNK-y'
+        elif word.endswith('ly'):
+            unk_tag = 'UNK-ly'
         elif word.startswith('anti-'):
             unk_tag = 'anti-UNK'
         elif word.endswith('ism'):
