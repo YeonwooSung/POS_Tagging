@@ -65,19 +65,17 @@ class HMM_UNK(HMM):
         elif word.endswith('ial'):
             unk_tag = 'UNK-ial'
         elif word.endswith('al'):
-            unk_tag = 'UNK-ial'
+            unk_tag = 'UNK-al'
         elif word.endswith("'t"):
             unk_tag = "UNK-'t"
         elif word.endswith('s'):
             unk_tag = 'UNK-s'
         elif word.endswith('ly'):
             unk_tag = 'UNK-ly'
-        elif word.endswith('ul'):
-            unk_tag = 'UNK-ul'
+        elif word.endswith('ful'):
+            unk_tag = 'UNK-ful'
         elif word.endswith('est'):
             unk_tag = 'UNK-est'
-        elif word.endswith('%'):
-            unk_tag = 'UNK-%'
         elif word.endswith('ed'):
             unk_tag = 'UNK-ed'
         elif word.endswith('ly'):
@@ -88,6 +86,8 @@ class HMM_UNK(HMM):
             unk_tag = 'UNK-ism'
         elif word.endswith("'ll"):
             unk_tag = "UNK-'ll"
+        elif word.endswith('%'):
+            unk_tag = 'UNK-%'
         #TODO
             #print('word={} tag={}'.format(word, tag))
         else:
