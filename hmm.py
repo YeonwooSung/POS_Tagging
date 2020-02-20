@@ -42,12 +42,10 @@ class HMM:
         # split testing sentences into tags and words - exclude delimiters
         self.testingWordsNoDelim, self.testingTagsNoDelim = self.splitWordsTagsTestingNoDelim()
 
-        #TODO ???? self.tagsDistribution = FreqDist(self.tags)
+        # Get unique tags
         self.uniqueTags, self.uniqueTagsNoDelim = self.getUniqueTags()
-
         # calculate smoothed probabilities
         self.wordsDist, self.tagsDist = self.setProbDistributions()
-
         # Mark as initialised
         self.initialised = True
 
