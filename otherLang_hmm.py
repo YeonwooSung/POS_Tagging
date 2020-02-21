@@ -36,7 +36,7 @@ if __name__ == '__main__':
     try:
         selected_corpus = int(sys.argv[1])
     except ValueError:
-        print('The first argument should be one of 1, 2, 3, 4 and 5')
+        print('The first argument should be one of 1, 2, 3, and 4')
         exit(1)
 
     if selected_corpus == 1:
@@ -46,10 +46,10 @@ if __name__ == '__main__':
         print('\nHMM for floresta')
         main_otherLang(floresta, "")
     elif selected_corpus == 3:
-        print('\nHMM for conll2000')
-        main_otherLang(conll2000, "universal")
-    elif selected_corpus == 4:
         print('\nHMM for conll2002')
         main_otherLang(conll2002, "")
+    elif selected_corpus == 4:
+        print('\nHMM for conll2000')
+        main_otherLang(conll2000, "universal")
     else:
-        print('The first argument should be one of 1, 2, 3, 4 and 5')
+        print('The first argument should be one of 1, 2, 3, and 4')
