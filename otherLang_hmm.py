@@ -1,5 +1,6 @@
 import nltk
 import sys
+import time
 from hmm import HMM
 from nltk.corpus import conll2000, conll2002, alpino, floresta
 
@@ -35,9 +36,11 @@ if __name__ == '__main__':
     selected_corpus = ''
     try:
         selected_corpus = int(sys.argv[1])
-    except ValueError:
+    except (ValueError, IndexError) as e:
         print('The first argument should be one of 1, 2, 3, and 4')
         exit(1)
+
+    start = time.time()
 
     if selected_corpus == 1:
         print('\nHMM for alpino')
@@ -53,3 +56,7 @@ if __name__ == '__main__':
         main_otherLang(conll2000, "universal")
     else:
         print('The first argument should be one of 1, 2, 3, and 4')
+        exit(1)
+
+    costTime = time.time() - start
+    print('Total cost time = {0:.2f}'.format(costTime))

@@ -54,9 +54,15 @@ class HMM:
         """
         Viterbi Algorithm
         """
+        print('Start viterbi algorithm')
         finalTags=[]
         probMatrix = []
         distOfStartOfSentence = self.tagsDist['<s>']
+
+        #TODO
+        for w in self.occurrenceMap_w:
+            if self.occurrenceMap_w[w] == 1:
+                print(w)
 
         # check if the targetSentences is None
         if targetSentences is None:
@@ -93,6 +99,8 @@ class HMM:
                 probMatrix.append(col)
 
             finalTags.append(self.getTagsFromMatrix(probMatrix, s))
+
+        print('Finish viterbi algorithm')
 
         return finalTags
 
