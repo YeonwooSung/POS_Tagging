@@ -262,11 +262,12 @@ class HMM:
 
         for t in self.uniqueTags:
             tagList = []
+            lenOfTags = len(self.tags)
             wordList = []
-            for i in range(len(self.tags)-1):
+            for i in range(lenOfTags - 1):
                 if self.tags[i] == t:
                     wordList.append(self.words[i])
-                    if i < (len(self.tags)-2):
+                    if i < (lenOfTags - 2):
                         tagList.append(self.tags[i+1])
             tag_dist[t] = WittenBellProbDist(FreqDist(tagList), bins=1e5)
             word_dist[t] = WittenBellProbDist(FreqDist(wordList), bins=1e5)
