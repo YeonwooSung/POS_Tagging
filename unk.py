@@ -5,9 +5,10 @@ import operator
 
 
 class HMM_UNK(HMM):
-    def __init__(self, corpus, tagset="", trainSize=10000, testSize=500):
+    def __init__(self, corpus, tagset="", trainSize=10000, testSize=500, lang='en'):
         super().__init__(corpus, tagset, trainSize, testSize)
         self.initialised = False  # mark as 'not initialised'
+        self.lang = lang
     
     def setup(self):
         # split the set of all sentences into training set and testing set
@@ -38,8 +39,7 @@ class HMM_UNK(HMM):
 
         self.initialised = True  # mark as 'initialised'
 
-
-    def convertWordToUNKTag(self, word, tag):
+    def convertWordToUNKTag_EN(self, word, tag):
         unk_tag = 'UNK'
 
         if word.endswith('ing'):
@@ -101,6 +101,50 @@ class HMM_UNK(HMM):
 
         return unk_tag
 
+    def convertWordToUNKTag_DU(self, word, tag):
+        unk_tag = 'UNK'
+
+        if word.endswith('te'):
+            unk_tag = 'UNK-te'
+        elif word.endswith('de'):
+            unk_tag = 'UNK-de'
+        elif word.startswith('ge') and (word.endswith('t') or word.endswith('d')):
+            # pp -> ge + word + t/d
+            unk_tag = 'ge-UNK-(t/d)'
+        elif word.endswith('tien'):
+            # tien is equal to teen in English
+            unk_tag = 'UNK-tien'
+        elif word.endswith('honderd'):
+            #honderd = hundred
+            unk_tag = 'UNK-honderd'
+        elif word.endswith('thie'):
+            # 'thie' endings are the equivalents of the English -thy (sympathy) and -thic.
+            # 'thie' is used for nouns
+            unk_tag = 'UNK-thie'
+        elif word.endswith('thisch'):
+            # 'thisch' endings are the equivalents of the English -thy (sympathy) and -thic.
+            # 'thisch' is used for nouns
+            unk_tag = 'UNK-thisch'
+        elif word.endswith('achtig'):
+            # '-achtig' is the Dutch translation for English '-like'
+            unk_tag = 'UNK-achtig'
+        elif word.endswith('ische'):
+            # Many Dutch adjectives end in -isch or -ische (inflected).
+            # It means something like English -ish.
+            unk_tag = 'UNK-ische'
+        elif word.startswith('ont'):
+            unk_tag = 'ont-UNK'
+        elif word.startswith('er'):
+            unk_tag = 'er-UNK'
+        elif word.endswith('en'):
+            unk_tag = 'UNK-en'
+        elif word.endswith('s'):
+            unk_tag = 'UNK-s'
+        else:
+            unk_tag = word
+
+        return unk_tag
+
     def replaceInfrequentWords_UNK(self):
         """
         Find and replace the infrequent words with suitable UNK tag.
@@ -111,7 +155,10 @@ class HMM_UNK(HMM):
         for w, t in zip(self.words, self.tags):
             word = w
             if self.occurrenceMap_w[w] == 1:
-                word = self.convertWordToUNKTag(w, t)
+                if self.lang == 'en':
+                    word = self.convertWordToUNKTag_EN(w, t)
+                elif self.lang == 'du':
+                    word = self.convertWordToUNKTag_DU(w, t)
             newList.append(word)
         return newList
     
@@ -136,7 +183,10 @@ class HMM_UNK(HMM):
 
                 # Check if a word did not occur in the training corpus or only infrequently (occurred once).
                 if (word not in self.occurrenceMap_w) or (self.occurrenceMap_w[word] == 1):
-                    word = self.convertWordToUNKTag(init_word, '')
+                    if self.lang == 'en':
+                        word = self.convertWordToUNKTag_EN(init_word, '')
+                    elif self.lang == 'du':
+                        word = self.convertWordToUNKTag_DU(init_word, '')
 
                 for t in self.uniqueTagsNoDelim:
 
