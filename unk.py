@@ -132,6 +132,8 @@ class HMM_UNK(HMM):
             # Many Dutch adjectives end in -isch or -ische (inflected).
             # It means something like English -ish.
             unk_tag = 'UNK-ische'
+        elif word.endswith('isch'):
+            unk_tag = 'UNK-isch'
         elif word.startswith('ont'):
             unk_tag = 'ont-UNK'
         elif word.startswith('er'):

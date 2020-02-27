@@ -234,13 +234,14 @@ class HMM:
         return self.splitIntoWordsAndTags(self.check_sents)
 
     def splitWordsTagsTestingNoDelim(self):
-        sentances = []
+        sentences = []
         tags = []
 
         for s in self.check_sents:
-            sentances.append(untag(s)) # untag the sentence, and append it to the list of sentences
+            # untag the sentence, and append it to the list of sentences
+            sentences.append(untag(s))
             tags.append([t for (_, t) in s]) # add all tags in a sentence to a list of tags
-        return sentances, tags
+        return sentences, tags
 
 
     def getUniqueTags(self):

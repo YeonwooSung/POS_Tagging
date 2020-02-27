@@ -3,7 +3,7 @@ import sys
 import time
 from hmm import HMM
 from unk import HMM_UNK
-from nltk.corpus import conll2000, conll2002, alpino, floresta
+from nltk.corpus import conll2000, conll2002, alpino, floresta, cess_esp
 
 
 
@@ -90,13 +90,18 @@ if __name__ == '__main__':
         if unk:
             main_otherLang_UNK(conll2002, "", '??')
         else:
-            main_otherLang(conll2002, "")
+            main_otherLang(conll2002, "esp")
     elif selected_corpus == 4:
         print('\nHMM for conll2000')
         if unk:
             main_otherLang_UNK(conll2000, "universal", "en")
         else:
             main_otherLang(conll2000, "universal")
+    elif selected_corpus == 5:
+        if unk:
+            main_otherLang_UNK(cess_esp, "", "es")
+        else:
+            main_otherLang(cess_esp, "")
     else:
         print('The first argument should be one of 1, 2, 3, and 4')
         exit(1)
