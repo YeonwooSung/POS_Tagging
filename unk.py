@@ -39,70 +39,66 @@ class HMM_UNK(HMM):
 
         self.initialised = True  # mark as 'initialised'
 
-    def convertWordToUNKTag_EN(self, word, tag):
-        unk_tag = 'UNK'
+    def convertWordToUNKTag_EN(self, word):
+        unk_tag = word
 
         if word.endswith('ing'):
             unk_tag = 'UNK-ing'
         elif word.endswith("'s"):
             unk_tag = "UNK's"
-        elif ',' in word:
-            splitted = word.split(',')
-            # use try-except to check if the string is a number
-            try:
-                for w in splitted:
-                    val = int(w)
-                unk_tag = 'UNK-Num'
-            except:
-                if '$' in word:
-                    unk_tag = 'UNK-$'  # i.e. $25,000
-                else:
-                    unk_tag = 'UNK-unit'  # i.e. 75,000-ton , 25,000-man
         elif word.endswith('ion') or word.endswith('ions'):
             unk_tag = 'UNK-ion'
-        elif word.endswith('ing'):
-            unk_tag = 'UNK-ing'
         elif word.endswith('ial'):
             unk_tag = 'UNK-ial'
+        elif word.endswith('ble'):
+            unk_tag = 'UNK-ble'
+        elif word.endswith('er'):
+            unk_tag = 'UNK-er'
+        elif word.endswith('or'):
+            unk_tag = 'UNK-or'
         elif word.endswith('al'):
             unk_tag = 'UNK-al'
-        elif word.endswith("'t"):
-            unk_tag = "UNK-'t"
-        elif word.endswith('s'):
-            unk_tag = 'UNK-s'
-        elif word.endswith('ly'):
-            unk_tag = 'UNK-ly'
+        elif word.endswith('fy'):
+            unk_tag = 'UNK-fy'
+        elif word.endswith('ic'):
+            unk_tag = 'UNK-ic'
         elif word.endswith('ful'):
             unk_tag = 'UNK-ful'
         elif word.endswith('est'):
             unk_tag = 'UNK-est'
+        elif word.endswith('less'):
+            unk_tag = 'UNK-less'
+        elif word.endswith('ous'):
+            unk_tag = 'UNK-ous'
         elif word.endswith('ed'):
             unk_tag = 'UNK-ed'
         elif word.endswith('ly'):
             unk_tag = 'UNK-ly'
-        elif word.startswith('anti-'):
+        elif word.startswith('anti'):
             unk_tag = 'anti-UNK'
+        elif word.startswith('pre'):
+            unk_tag = 'pre-UNK'
         elif word.endswith('ism'):
             unk_tag = 'UNK-ism'
         elif word.endswith("'ll"):
             unk_tag = "UNK-'ll"
-        elif word.endswith('%'):
-            unk_tag = 'UNK-%'
-        #TODO
-            #print('word={} tag={}'.format(word, tag))
-        else:
-            try:
-                val = int(word)
-                unk_tag = 'UNK-Num'
-            except ValueError:
-                #TODO
-                #print('word={} tag={}'.format(word, tag))
-                unk_tag = word
+        elif word.endswith("'t"):
+            unk_tag = "UNK-'t"
+        elif word.endswith('wise'):
+            # i.e. otherwise, likewise, clockwise
+            unk_tag = 'UNK-wise'
+        elif word.endswith('ward') or word.endswith('wards'):
+            # i.e. forward, backward
+            unk_tag = 'UNK-ward'
+        elif word.endswith('ist'):
+            unk_tag = 'UNK-ist'
+        elif word.endswith('s'):
+            unk_tag = 'UNK-s'
 
         return unk_tag
 
-    def convertWordToUNKTag_DU(self, word, tag):
-        unk_tag = 'UNK'
+    def convertWordToUNKTag_DU(self, word):
+        unk_tag = word
 
         if word.endswith('te'):
             unk_tag = 'UNK-te'
@@ -142,8 +138,44 @@ class HMM_UNK(HMM):
             unk_tag = 'UNK-en'
         elif word.endswith('s'):
             unk_tag = 'UNK-s'
-        else:
-            unk_tag = word
+
+        return unk_tag
+
+    def convertWordToUNKTag_PO(self, word):
+        unk_tag = word
+
+        if word.endswith('ário'):
+            # ário is a suffix that is used for "professional" or "place"
+            unk_tag = 'ário'
+        elif word.endswith('eiro'):
+            # eiro is a suffix that is used for "professional"
+            unk_tag = 'UNK-eiro'
+        elif word.endswith('inho') or word.endswith('ico') or word.endswith('isco'):
+            # inho, ico, and isco are the diminutive suffixes
+            # inho is much more used than the other diminutive suffixes
+            unk_tag = 'UNK-diminutive'
+        elif word.endswith('ão') or word.endswith('aço') or word.endswith('aréu'):
+            # ão, aço, and aréu are the augmentative suffixes
+            unk_tag = 'UNK-augmentative'
+        elif word.endswith('mente'):
+            # mente is a suffix that is generally used for adverbs
+            # It does similar thing with "-ly" in English
+            unk_tag = 'UNK-mente'
+        elif word.startswith('Anfi') or word.startswith('anfi'):
+            # prefix for dualty
+            unk_tag = 'anfi-UNK'
+        elif word.startswith('Anti') or word.startswith('anti'):
+            # prefix for opposition
+            unk_tag = 'anti-UNK'
+        elif word.startswith('sim') or word.startswith('Sim') or word.startswith('sin') or word.startswith('Sin'):
+            # "simultaneously"
+            unk_tag = 'si(m/n)-UNK'
+        elif word.startswith('peri') or word.startswith('Peri'):
+            # "Around"
+            unk_tag = 'peri-UNK'
+        elif word.startswith('Hemi') or word.startswith('hemi'):
+            # "Half"
+            unk_tag = 'hemi-UNK'
 
         return unk_tag
 
@@ -158,12 +190,14 @@ class HMM_UNK(HMM):
             word = w
             if self.occurrenceMap_w[w] == 1:
                 if self.lang == 'en':
-                    word = self.convertWordToUNKTag_EN(w, t)
+                    word = self.convertWordToUNKTag_EN(w)
                 elif self.lang == 'du':
-                    word = self.convertWordToUNKTag_DU(w, t)
+                    word = self.convertWordToUNKTag_DU(w)
+                elif self.lang == 'po':
+                    word = self.convertWordToUNKTag_PO(w)
             newList.append(word)
         return newList
-    
+
     def viterbi(self, targetSentences:list=None):
         """
         Viterbi Algorithm
@@ -186,9 +220,11 @@ class HMM_UNK(HMM):
                 # Check if a word did not occur in the training corpus or only infrequently (occurred once).
                 if (word not in self.occurrenceMap_w) or (self.occurrenceMap_w[word] == 1):
                     if self.lang == 'en':
-                        word = self.convertWordToUNKTag_EN(init_word, '')
+                        word = self.convertWordToUNKTag_EN(word)
                     elif self.lang == 'du':
-                        word = self.convertWordToUNKTag_DU(init_word, '')
+                        word = self.convertWordToUNKTag_DU(word)
+                    elif self.lang == 'po':
+                        word = self.convertWordToUNKTag_PO(word)
 
                 for t in self.uniqueTagsNoDelim:
 

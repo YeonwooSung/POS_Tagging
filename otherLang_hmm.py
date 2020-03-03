@@ -57,7 +57,7 @@ if __name__ == '__main__':
     try:
         selected_corpus = int(sys.argv[1])
     except (ValueError, IndexError) as e:
-        print('The first argument should be one of 1, 2, 3, and 4')
+        print('The first argument should be one of 1, 2, 3, 4, and 5')
         exit(1)
 
     # check if the user input 2nd command line argument
@@ -81,6 +81,7 @@ if __name__ == '__main__':
             main_otherLang(alpino, "")
     elif selected_corpus == 2:
         print('\nHMM for floresta')
+        # floresta = 9k sentences, tagged and parsed (Portuguese)
         if unk:
             main_otherLang_UNK(floresta, "", 'po')
         else:
@@ -88,7 +89,7 @@ if __name__ == '__main__':
     elif selected_corpus == 3:
         print('\nHMM for conll2002')
         if unk:
-            main_otherLang_UNK(conll2002, "", '??')
+            main_otherLang_UNK(conll2002, "esp", 'es')
         else:
             main_otherLang(conll2002, "esp")
     elif selected_corpus == 4:
@@ -103,7 +104,7 @@ if __name__ == '__main__':
         else:
             main_otherLang(cess_esp, "")
     else:
-        print('The first argument should be one of 1, 2, 3, and 4')
+        print('The first argument should be one of 1, 2, 3, 4, and 5')
         exit(1)
 
     costTime = time.time() - start
