@@ -141,6 +141,44 @@ class HMM_UNK(HMM):
 
         return unk_tag
 
+    def convertWordToUNKTag_ES(self, word):
+        unk_tag = word
+
+        if word.endswith('achon'):
+            # Adds negative connotations to a word
+            unk_tag = 'UNK-achon'
+        elif word.endswith('aco'):
+            # It sometimes adds a despective sense, it is also seen to add a demonym
+            unk_tag = 'UNK-aco'
+        elif word.endswith('ado'):
+            # Makes reference to names of associations or ensembles
+            unk_tag = 'UNK-ado'
+        elif word.endswith('ción'):
+            # Expresses the idea of action on nouns that are derived from a verb
+            unk_tag = 'UNK-ción'
+        elif word.endswith('mente'):
+            # Uses adjectives to form modal adverbs
+            unk_tag = 'UNK-mente'
+        elif word.endswith('génesis'):
+            # Transmits the idea of origin or beginning
+            unk_tag = 'UNK-génesis'
+
+        # suffixes that makes the words to nouns or adjectives
+        elif word.endswith('able'):
+            unk_tag = 'UNK-able'
+        elif word.endswith('ario'):
+            unk_tag = 'UNK-ario'
+        elif word.endswith('eña') or word.endswith('eño'):
+            unk_tag = 'UNK-eñ(a/o)'
+        elif word.endswith('iza') or word.endswith('izo'):
+            unk_tag = 'UNK-iz(a/o)'
+        elif word.endswith('oso') or word.endswith('osa'):
+            unk_tag = 'UNK-os(a/o)'
+        elif word.endswith('or'):
+            unk_tag = 'UNK-or'
+
+        return unk_tag
+
     def convertWordToUNKTag_PO(self, word):
         unk_tag = word
 
@@ -195,6 +233,8 @@ class HMM_UNK(HMM):
                     word = self.convertWordToUNKTag_DU(w)
                 elif self.lang == 'po':
                     word = self.convertWordToUNKTag_PO(w)
+                elif self.lang == 'es':
+                    word = self.convertWordToUNKTag_ES(w)
             newList.append(word)
         return newList
 
@@ -225,6 +265,8 @@ class HMM_UNK(HMM):
                         word = self.convertWordToUNKTag_DU(word)
                     elif self.lang == 'po':
                         word = self.convertWordToUNKTag_PO(word)
+                    elif self.lang == 'es':
+                        word = self.convertWordToUNKTag_ES(word)
 
                 for t in self.uniqueTagsNoDelim:
 
