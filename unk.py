@@ -5,11 +5,12 @@ import operator
 
 
 class HMM_UNK(HMM):
-    def __init__(self, corpus, tagset="", trainSize=10000, testSize=500, lang='en'):
+    def __init__(self, corpus, tagset="", trainSize=10000, testSize=500, lang='en', infrequent=1):
         super().__init__(corpus, tagset, trainSize, testSize)
         self.initialised = False  # mark as 'not initialised'
         self.lang = lang
-    
+        self.infrequent = infrequent
+
     def setup(self):
         # split the set of all sentences into training set and testing set
         self.trainSents, self.testSents = self.splitTrainingTesting()
@@ -40,6 +41,7 @@ class HMM_UNK(HMM):
         self.initialised = True  # mark as 'initialised'
 
     def convertWordToUNKTag_EN(self, word):
+        word = word.lower()
         unk_tag = word
 
         if word.endswith('ing'):
@@ -80,10 +82,6 @@ class HMM_UNK(HMM):
             unk_tag = 'pre-UNK'
         elif word.endswith('ism'):
             unk_tag = 'UNK-ism'
-        elif word.endswith("'ll"):
-            unk_tag = "UNK-'ll"
-        elif word.endswith("'t"):
-            unk_tag = "UNK-'t"
         elif word.endswith('wise'):
             # i.e. otherwise, likewise, clockwise
             unk_tag = 'UNK-wise'
@@ -101,8 +99,10 @@ class HMM_UNK(HMM):
         unk_tag = word
 
         if word.endswith('te'):
+            # used for adjectives
             unk_tag = 'UNK-te'
         elif word.endswith('de'):
+            # form ordinal numbers to cardinal numbers
             unk_tag = 'UNK-de'
         elif word.startswith('ge') and (word.endswith('t') or word.endswith('d')):
             # pp -> ge + word + t/d
@@ -131,12 +131,16 @@ class HMM_UNK(HMM):
         elif word.endswith('isch'):
             unk_tag = 'UNK-isch'
         elif word.startswith('ont'):
+            # prefix "ont-"
             unk_tag = 'ont-UNK'
         elif word.startswith('er'):
+            # prefix "er-"
             unk_tag = 'er-UNK'
         elif word.endswith('en'):
+            # A suffix “-en” forms verbs from nouns or adjectives.
             unk_tag = 'UNK-en'
         elif word.endswith('s'):
+            # forms regular plurals of nouns that end in certain suffixes or syllables
             unk_tag = 'UNK-s'
 
         return unk_tag
@@ -226,7 +230,7 @@ class HMM_UNK(HMM):
         # iterate both word list and tag list to find and replace the infrequent words with suitable UNK tag
         for w, t in zip(self.words, self.tags):
             word = w
-            if self.occurrenceMap_w[w] == 1:
+            if self.occurrenceMap_w[w] <= self.infrequent:
                 if self.lang == 'en':
                     word = self.convertWordToUNKTag_EN(w)
                 elif self.lang == 'du':
@@ -258,7 +262,7 @@ class HMM_UNK(HMM):
                 word = init_word
 
                 # Check if a word did not occur in the training corpus or only infrequently (occurred once).
-                if (word not in self.occurrenceMap_w) or (self.occurrenceMap_w[word] == 1):
+                if (word not in self.occurrenceMap_w) or (self.occurrenceMap_w[word] <= self.infrequent):
                     if self.lang == 'en':
                         word = self.convertWordToUNKTag_EN(word)
                     elif self.lang == 'du':
