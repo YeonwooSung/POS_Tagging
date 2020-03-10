@@ -122,11 +122,6 @@ class HMM:
             """
             targetMap = {}
             for e in targetList:
-                #TODO
-                # skip the start-of-sentence and end-of-sentence
-                #if e == '<s>' or e == '</s>':
-                    #continue
-
                 if targetMap.get(e) is None:
                     targetMap[e] = 1
                 else:

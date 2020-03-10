@@ -78,6 +78,7 @@ if __name__ == '__main__':
             main_otherLang(floresta, "")
     elif selected_corpus == 3:
         print('\nHMM for conll2002')
+        # conll2002 contains both Spanish and Dutch sentences
         if unk:
             main_otherLang_UNK(conll2002, "esp", 'es')
         else:
@@ -89,6 +90,7 @@ if __name__ == '__main__':
         else:
             main_otherLang(conll2000, "universal")
     elif selected_corpus == 5:
+        # 1M words, tagged and parsed (Catalan, Spanish)
         if unk:
             main_otherLang_UNK(cess_esp, "", "es")
         else:
