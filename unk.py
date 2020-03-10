@@ -41,7 +41,7 @@ class HMM_UNK(HMM):
         self.initialised = True  # mark as 'initialised'
 
     def convertWordToUNKTag_EN(self, word):
-        word = word.lower()
+        #word = word.lower()
         unk_tag = word
 
         if word.endswith('ing'):

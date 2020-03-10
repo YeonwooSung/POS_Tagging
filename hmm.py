@@ -59,11 +59,6 @@ class HMM:
         probMatrix = []
         distOfStartOfSentence = self.tagsDist['<s>']
 
-        #TODO
-        for w in self.occurrenceMap_w:
-            if self.occurrenceMap_w[w] == 1:
-                print(w)
-
         # check if the targetSentences is None
         if targetSentences is None:
             targetSentences = self.testingWordsNoDelim  # If None, use the testing sentences
@@ -280,13 +275,13 @@ class HMM:
         pointer = ""
 
         for i in range(1, len(s)+1):
-            max = 0
+            maxVal = 0
             maxID = 0
             if i == 1:
                 for j in range(0, len(self.uniqueTagsNoDelim)):
 
-                    if matrix[-i][j][0] > max:
-                        max = matrix[-i][j][0]
+                    if matrix[-i][j][0] > maxVal:
+                        maxVal = matrix[-i][j][0]
                         maxID = j
                 finalTags.append(self.uniqueTagsNoDelim[maxID])
                 pointer = matrix[-i][maxID][1]
