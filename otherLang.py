@@ -18,36 +18,26 @@ def main_otherLang_UNK(corpus, tagset, lang):
     numOfSents = len(tagged_sents)
     print('The number of total sentences = {}'.format(numOfSents))
 
-    if numOfSents > 10500:
-        hmm = HMM_UNK(corpus, tagset, lang=lang)
-        hmm.setup()
-        hmm.viterbi_test()
-    else:
-        # train : test = 95 : 5
-        train_size = int(numOfSents / 100 * 95)
-        test_size = numOfSents - train_size
+    # train : test = 95 : 5
+    train_size = int(numOfSents / 100 * 95)
+    test_size = numOfSents - train_size
 
-        hmm = HMM_UNK(corpus, tagset, trainSize=train_size, testSize=test_size, lang=lang)
-        hmm.setup()
-        hmm.viterbi_test()
+    hmm = HMM_UNK(corpus, tagset, trainSize=train_size, testSize=test_size, lang=lang)
+    hmm.setup()
+    hmm.viterbi_test()
 
 def main_otherLang(corpus, tagset):
     tagged_sents = list(corpus.tagged_sents())
     numOfSents = len(tagged_sents)
     print('The number of total sentences = {}'.format(numOfSents))
 
-    if numOfSents > 10500:
-        hmm = HMM(corpus, tagset)
-        hmm.setup()
-        hmm.viterbi_test()
-    else:
-        # train : test = 95 : 5
-        train_size = int(numOfSents / 100 * 95)
-        test_size = numOfSents - train_size
+    # train : test = 95 : 5
+    train_size = int(numOfSents / 100 * 95)
+    test_size = numOfSents - train_size
 
-        hmm = HMM(corpus, tagset, trainSize=train_size, testSize=test_size)
-        hmm.setup()
-        hmm.viterbi_test()
+    hmm = HMM(corpus, tagset, trainSize=train_size, testSize=test_size)
+    hmm.setup()
+    hmm.viterbi_test()
 
 
 if __name__ == '__main__':
