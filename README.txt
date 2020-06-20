@@ -16,7 +16,7 @@ How to run the program
     5 = cess_esp corpus (Spanish)
 - The second argument is an optional one
 - If you want to use the second argument, you should put either y or n.
-- If the second argument is y, then the UNK tagging method will be executed with the selected corpus.
+- If the second argument is y, then the HMM with UNK tagging method will be executed with the selected corpus.
 - If the second argument is n, or there is no second argument, then the normal Viterbi algorithm will be executed.
 - i.e.
     alpino with HMM     ->  python3 otherLang.py 1
